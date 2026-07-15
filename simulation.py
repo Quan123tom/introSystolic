@@ -25,6 +25,10 @@ class SystolicArray:
             for j in range(self.cols):
                 self.grid[i][j].weight = weight_matrix[i][j]
     
-    
-
-        
+    def tick(self, left_inputs, up_inputs):
+        next_acts = [[0]*self.cols for _ in range(self.rows)]
+        next_psums = [[0] * self.cols for _ in range (self.rows)] #intialize acts and partial sums
+        #with 0s
+        for i in range(self.rows):
+            for j in range(self.cols):
+                activ_in = 
