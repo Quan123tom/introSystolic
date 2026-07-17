@@ -31,4 +31,9 @@ class SystolicArray:
         #with 0s
         for i in range(self.rows):
             for j in range(self.cols):
-                activ_in = 
+                if j == 0:
+                    act_in = left_inputs[i]
+                else:
+                    act_in = self.grid[i][j-1].activation_reg
+                psum_in = up_inputs[j] if i == 0 else self.grid[i-1][j].partialSum_reg
+                next_acts[i][j], next_psums[i][j] = self.grid[i][j].MAC(act_in, psum_in)
