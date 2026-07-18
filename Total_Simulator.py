@@ -32,7 +32,7 @@ for k in range(8):
         C_simulated[k, j] = raw_outputs[k + array.rows - 1 + j][j]
 
 C_expected = np.dot(A.T, W)
-print("It run for: ", cycles, "\n")
+print("It run for: ", scheduler.cycle, "\n")
 print("Simulated Output:\n", C_simulated)
 print("\nExpected Output (A @ W):\n", C_expected)
 print("\nMatches Expected?", np.array_equal(C_simulated, C_expected))
