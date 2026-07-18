@@ -42,9 +42,8 @@ class SystolicArray:
             for c in range(self.cols):
                 self.grid[r][c].update_regs(next_psums[r][c], next_acts[r][c])
         #define the final results(what comes from the bottom as a result)
-        east_outputs = [self.grid[r][self.cols-1].act_reg for r in range(self.rows)]
-        south_outputs = [self.grid[self.rows-1][c].psum_reg for c in range(self.cols)]
+        east_outputs = [self.grid[r][self.cols-1].activation_reg for r in range(self.rows)]
+        south_outputs = [self.grid[self.rows-1][c].partialSum_reg for c in range(self.cols)]
         return east_outputs, south_outputs
     
 
-    
