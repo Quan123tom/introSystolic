@@ -37,3 +37,14 @@ class SystolicArray:
                     act_in = self.grid[i][j-1].activation_reg
                 psum_in = up_inputs[j] if i == 0 else self.grid[i-1][j].partialSum_reg
                 next_acts[i][j], next_psums[i][j] = self.grid[i][j].MAC(act_in, psum_in)
+                #the above computes the next steps
+        for r in range(self.rows):
+            for c in range(self.cols):
+                self.grid[r][c].update_regs(next_psums[r][c], next_acts[r][c])
+        #define the final results(what comes from the bottom as a result)
+        east_outputs = [self.grid[r][self.cols-1].act_reg for r in range(self.rows)]
+        south_outputs = [self.grid[self.rows-1][c].psum_reg for c in range(self.cols)]
+        return east_outputs, south_outputs
+    
+
+    
