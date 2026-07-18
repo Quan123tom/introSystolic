@@ -8,3 +8,5 @@ def skew_inputs(matrix):
     for i in range(N):
         matrix_skewed[i, i:i+M] = matrix[i]
     return matrix_skewed
+
+

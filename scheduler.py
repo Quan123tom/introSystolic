@@ -3,6 +3,8 @@ import numpy as np
 class Scheduler:
     def __init__(self, A, W):
         #inputs will be skewed beforehabd
+        self.A = A
+        self.W = W
         self.cycle = 0
     
     def get_inputs(self):
@@ -10,6 +12,6 @@ class Scheduler:
         self.cycle += 1
         return left
     def done(self):
-        return self.cycle >= self.A.shape[1]
+        return (self.cycle >= self.A.shape[1])
 
  
