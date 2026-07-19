@@ -4,7 +4,7 @@ from scheduler import Scheduler
 
 import numpy as np
 
-A = np.random.randint(1, 100, size=(8, 8))
+A = np.random.randint(1, 100, size=(8, 100))
 W = np.random.randint(1, 100, size=(8, 8))
 
 A_skew = skew_inputs(A)
@@ -24,18 +24,35 @@ while not scheduler.done():
 
 
 raw_outputs = np.array(raw_outputs)
-C_simulated = np.zeros((8, 8))
+C_simulated = np.zeros((100, 8))
 
 
-for k in range(8):
+for k in range(100):
     for j in range(8):
         C_simulated[k, j] = raw_outputs[k + array.rows - 1 + j][j]
-total_pe_cycles = array.rows * array.cols * len(array.active_per_cycle)
+       #C_simulated[k, j] = raw_outputs[k + j][j]
+total_pes = array.rows * array.cols
+total_pe_cycles = total_pes * cycles
+
+peak_macs = max(array.active_per_cycle)
+avg_macs = array.total_mac / cycles
+utilization = (array.total_mac / total_pe_cycles) * 100
+
 C_expected = np.dot(A.T, W)
-print("It run for: ", scheduler.cycle, "\n")
-print("MAC operations:", array.total_mac)
-utilization = 100 * array.total_mac / total_pe_cycles
-print(f"PE utilization: {utilization:.2f}%")
+
+print(f"Cycles                : {cycles}")
+print(f"Array Size            : {array.rows} x {array.cols}")
+print(f"Total PEs             : {total_pes}\n")
+
+print(f"Useful MACs           : {array.total_mac}")
+print(f"Peak MACs/cycle       : {peak_macs}")
+print(f"Average MACs/cycle    : {avg_macs:.2f}\n")
+
+print(f"PE Utilization        : {utilization:.2f}%\n")
+
+print("Per-cycle activity\n")
+for i, active in enumerate(array.active_per_cycle):
+    print(f"Cycle {i:<2}: {active}")
 print("Simulated Output:\n", C_simulated)
 print("\nExpected Output (A @ W):\n", C_expected)
 print("\nMatches Expected?", np.array_equal(C_simulated, C_expected))
