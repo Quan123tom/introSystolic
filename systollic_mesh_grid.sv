@@ -6,6 +6,8 @@ module systollic_grid #(
 ) (
     input logic clk,
     input logic rst,
+    // weight matrix as input 
+    input logic signed [DATA_WIDTH-1:0] weight_matrix [GRID_SIZE-1:0][GRID_SIZE-1:0],
     // the following is the top, bottom interconnects  
     input logic [DATA_WIDTH-1:0] in_left [0:GRID_SIZE-1], 
     input logic [DATA_WIDTH-1:0] in_top [0:GRID_SIZE-1],
@@ -34,10 +36,17 @@ module systollic_grid #(
                     .DATA_WIDTH(DATA_WIDTH),
                     .ACC_WIDTH(ACC_WIDTH)
                 ) pe_inst(
+                    // inputs
                     .clk(clk),
                     .rst(rst),
-                    .
-                )
+                    .activations_in (act_bus[i][j]),
+                    .sums_in (sum_bus[i][j]),
+                    .weight_reg (weight_matrix[i][j]),
+                    // outputs
+                    .activations_out (act_bus[i][j+1]),
+                    .sums_out (sum_bus[i+1][j])
+
+                );
             end
         end
     endgenerate
