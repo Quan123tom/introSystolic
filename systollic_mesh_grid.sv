@@ -27,5 +27,11 @@ module systollic_grid #(
 
     // now i must do the initializarion of the 64 PE's required for my module 
     genvar i,j;
-    
+    generate
+        for (i = 0; i < GRID_SIZE; i++) begin
+            for (j = 0; j < GRID_SIZE; j++) begin
+                
+            end
+        end
+    endgenerate
 endmodule
