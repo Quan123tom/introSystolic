@@ -3,13 +3,13 @@ module PE #(
     parameter DATA_WIDTH = 8;
     parameter ACC_WIDTH = 16;
 )(
-    input logic clk;
-    input logic rst;
-    input logic signed [DATA_WIDTH - 1 : 0] activations_in; //left -> right
-    input logic signed [ACC_WIDTH-1:0] sums_in; // top -> bottom
-    input logic signed [DATA_WIDTH-1:0] weight_reg;  // weight stationary so it stays put
-    output logic signed [ACC_WIDTH-1:0] sums_out;
-    output logic signed [DATA_WIDTH-1:0] activations_out;
+    input logic clk,
+    input logic rst,
+    input logic signed [DATA_WIDTH - 1 : 0] activations_in, //left -> right
+    input logic signed [ACC_WIDTH-1:0] sums_in, // top -> bottom
+    input logic signed [DATA_WIDTH-1:0] weight_reg,  // weight stationary so it stays put
+    output logic signed [ACC_WIDTH-1:0] sums_out,
+    output logic signed [DATA_WIDTH-1:0] activations_out
 );
     // stage 1 registers
     logic signed [DATA_WIDTH-1:0] stage1_acts;
