@@ -16,7 +16,7 @@ module systolic_grid #(
 );
     // now i need to make the modules that connect the PE's with eachother
     logic [ACC_WIDTH-1:0] sum_bus [0:GRID_SIZE][0:GRID_SIZE-1];
-    logic [DATA_WIDTH-1:0] act_bus [0:GRID_SIZE-1][0:GRID_SIZE-1];
+    logic [DATA_WIDTH-1:0] act_bus [0:GRID_SIZE-1][0:GRID_SIZE];
     // now we have the wires that connect the PE's with eachother
     genvar b;
     generate
