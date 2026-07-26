@@ -1,7 +1,7 @@
 
 module PE #(
-    parameter DATA_WIDTH = 8;
-    parameter ACC_WIDTH = 16;
+    parameter DATA_WIDTH = 8,
+    parameter ACC_WIDTH = 16
 )(
     input logic clk,
     input logic rst,
@@ -15,8 +15,8 @@ module PE #(
     logic signed [DATA_WIDTH-1:0] stage1_acts;
     logic signed [ACC_WIDTH-1:0] stage1_product;
     logic signed [ACC_WIDTH-1:0] stage1_sums_in;
-    wire is_zero = (activations_in == '0;) || (weight_reg == '0;); // for saving power when an activation or a weight is actively 0
-    always_ff @( posedge clk or posedge rst ) begin : 
+    wire is_zero = (activations_in == '0) || (weight_reg == '0); // for saving power when an activation or a weight is actively 0
+    always_ff @( posedge clk or posedge rst ) begin  
         if (rst) begin
             stage1_acts <= '0;
             stage1_product <= '0;
@@ -33,7 +33,7 @@ module PE #(
             end
         end 
     end
-    always_ff @( posedge clk or posedge rst ) begin : 
+    always_ff @( posedge clk or posedge rst ) begin 
         if (rst) begin
             sums_out <= '0;
             activations_out <= '0;
@@ -41,6 +41,7 @@ module PE #(
         else begin
             sums_out <= stage1_product + stage1_sums_in;
             activations_out <= stage1_acts;
+    end
     end
 endmodule
 
