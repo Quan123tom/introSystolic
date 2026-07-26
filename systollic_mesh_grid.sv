@@ -1,7 +1,7 @@
 
-module systollic_grid #(
+module systolic_grid #(
     parameter DATA_WIDTH = 8,
-    parameter ACC_WIDTH = 16,
+    parameter ACC_WIDTH = 19,
     parameter GRID_SIZE = 8
 ) (
     input logic clk,
@@ -9,13 +9,13 @@ module systollic_grid #(
     // weight matrix as input 
     input logic signed [DATA_WIDTH-1:0] weight_matrix [GRID_SIZE-1:0][GRID_SIZE-1:0],
     // the following is the top, bottom interconnects  
-    input logic [DATA_WIDTH-1:0] in_left [0:GRID_SIZE-1], 
-    input logic [DATA_WIDTH-1:0] in_top [0:GRID_SIZE-1],
-    output logic [DATA_WIDTH-1:0] out_right [0:GRID_SIZE-1],
-    output logic [DATA_WIDTH-1:0] out_bottom [0:GRID_SIZE-1]
+    input logic signed [DATA_WIDTH-1:0] in_left [0:GRID_SIZE-1], 
+    input logic signed [ACC_WIDTH-1:0] in_top [0:GRID_SIZE-1],
+    output logic signed [DATA_WIDTH-1:0] out_right [0:GRID_SIZE-1],
+    output logic signed [ACC_WIDTH-1:0] out_bottom [0:GRID_SIZE-1]
 );
     // now i need to make the modules that connect the PE's with eachother
-    logic [DATA_WIDTH-1:0] sum_bus [0:GRID_SIZE][0:GRID_SIZE-1];
+    logic [ACC_WIDTH-1:0] sum_bus [0:GRID_SIZE][0:GRID_SIZE-1];
     logic [DATA_WIDTH-1:0] act_bus [0:GRID_SIZE-1][0:GRID_SIZE-1];
     // now we have the wires that connect the PE's with eachother
     genvar b;
@@ -24,6 +24,7 @@ module systollic_grid #(
             assign act_bus[b][0] = in_left[b]; // connect activations to the module
             assign sum_bus[0][b] = in_top[b]; // connect summs to the top
             assign out_bottom[b] = sum_bus[GRID_SIZE][b]; // connect the output to the actual output bus
+            assign out_right[b] = act_bus[b][GRID_SIZE]; 
         end
     endgenerate
 

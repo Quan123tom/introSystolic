@@ -1,7 +1,7 @@
 
 module PE #(
     parameter DATA_WIDTH = 8,
-    parameter ACC_WIDTH = 16
+    parameter ACC_WIDTH = 19
 )(
     input logic clk,
     input logic rst,
