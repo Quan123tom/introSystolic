@@ -32,7 +32,7 @@ module systollic_grid #(
     generate
         for (i = 0; i < GRID_SIZE; i++) begin
             for (j = 0; j < GRID_SIZE; j++) begin
-                pe #(
+                PE #(
                     .DATA_WIDTH(DATA_WIDTH),
                     .ACC_WIDTH(ACC_WIDTH)
                 ) pe_inst(
