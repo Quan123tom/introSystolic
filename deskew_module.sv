@@ -1,7 +1,6 @@
 module deskew_unit #(
     parameter ACC_WIDTH = 19,
     parameter GRID_SIZE = 8,
-    // Must match the PE's partial-sum latency per hop
     parameter DELAY_PER_STEP = 2 
 )(
     input  logic clk,
