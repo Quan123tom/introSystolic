@@ -15,7 +15,8 @@ module PE #(
     logic signed [DATA_WIDTH-1:0] stage1_acts;
     logic signed [ACC_WIDTH-1:0] stage1_product;
     logic signed [ACC_WIDTH-1:0] stage1_sums_in;
-    wire is_zero = (activations_in == '0) || (weight_reg == '0); // for saving power when an activation or a weight is actively 0
+    wire signed [DATA_WIDTH-1:0] gated_act = is_zero ? '0 : activations_in;
+    wire signed [DATA_WIDTH-1:0] gated_wt  = is_zero ? '0 : weight_reg;
     always_ff @( posedge clk or posedge rst ) begin  
         if (rst) begin
             stage1_acts <= '0;
@@ -25,14 +26,10 @@ module PE #(
         else begin
             stage1_acts <= activations_in;
             stage1_sums_in <= sums_in;
-            if (is_zero) begin
-                stage1_product <= '0;
-            end
-            else begin
-            stage1_product <= activations_in * weight_reg;
-            end
+            stage1_product <= gated_act * gated_wt;
         end 
     end
+
     always_ff @( posedge clk or posedge rst ) begin 
         if (rst) begin
             sums_out <= '0;
@@ -41,7 +38,7 @@ module PE #(
         else begin
             sums_out <= stage1_product + stage1_sums_in;
             activations_out <= stage1_acts;
-    end
+        end
     end
 endmodule
 
