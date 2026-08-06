@@ -18,11 +18,6 @@ module PE#(
     logic signed [ACC_WIDTH-1:0]  stage1_prod;
 
     logic stage1_load_en;
-
-    wire is_zero = (activations_in == '0) || (weight_reg == '0);
-    wire signed [DATA_WIDTH-1:0] gated_act = is_zero ? '0 : activations_in;
-    wire signed [DATA_WIDTH-1:0] gated_wt  = is_zero ? '0 : weight_reg;
-
     always_ff @(posedge clk or negedge rst_ni) begin
         if (!rst_ni) begin
             weight_reg <= '0;

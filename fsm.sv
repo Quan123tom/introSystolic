@@ -29,7 +29,8 @@ module tpu_fsm (
         ST_DRAIN,
         ST_DONE
     } state_t;
-
+    localparam WEIGHT_LOAD_CYCLES = GRID_SIZE - 1;
+    localparam WEIGHT_WAIT_CYCLES = GRID_SIZE * DELAY_PER_STEP;
     state_t state, next_state;
 
     logic [3:0]  weight_cnt;
@@ -79,12 +80,12 @@ module tpu_fsm (
             ST_LOAD_WEIGHTS: begin
                 fsm_loading_weights = 1'b1;
                 fsm_en_weight_agu   = 1'b1;
-                if (weight_cnt == 4'd7) next_state = ST_WAIT_WEIGHTS;
+                if (weight_cnt == WEIGHT_LOAD_CYCLES) next_state = ST_WAIT_WEIGHTS;
             end
 
             ST_WAIT_WEIGHTS: begin
                 fsm_loading_weights = 1'b1;
-                if (wait_cnt == 5'd16) next_state = ST_COMPUTE;
+                if (wait_cnt == WEIGHT_WAIT_CYCLES) next_state = ST_COMPUTE;
             end
 
             ST_COMPUTE: begin
