@@ -1,4 +1,4 @@
-module PE#(
+module PE #(
     parameter DATA_WIDTH = 8,
     parameter ACC_WIDTH  = 19
 )(
@@ -6,51 +6,55 @@ module PE#(
     input  logic rst_ni, 
     input  logic load_en,
     output logic load_en_out,
+    
     input  logic signed [DATA_WIDTH-1:0] activations_in,
     input  logic signed [ACC_WIDTH-1:0]  sums_in,
+    
     output logic signed [DATA_WIDTH-1:0] activations_out,
     output logic signed [ACC_WIDTH-1:0]  sums_out
 );
 
     logic signed [DATA_WIDTH-1:0] weight_reg;
-    logic signed [DATA_WIDTH-1:0] stage1_act;
-    logic signed [ACC_WIDTH-1:0]  stage1_sum;
-    logic signed [ACC_WIDTH-1:0]  stage1_prod;
+    logic signed [DATA_WIDTH-1:0] act_reg;
+    logic signed [ACC_WIDTH-1:0]  sum_reg;
+    logic signed [ACC_WIDTH-1:0]  prod_reg;
 
-    logic stage1_load_en;
+    logic act_valid;
+    logic signed [DATA_WIDTH-1:0] gated_act;
+    logic signed [DATA_WIDTH-1:0] gated_wt;
+    
+    assign act_valid = (activations_in != '0);
+
+    assign gated_act = activations_in & {DATA_WIDTH{act_valid}};
+    assign gated_wt  = weight_reg     & {DATA_WIDTH{act_valid}};
+
     always_ff @(posedge clk or negedge rst_ni) begin
         if (!rst_ni) begin
-            weight_reg <= '0;
-            stage1_act <= '0;
-            stage1_sum <= '0;
-            stage1_prod <= '0;
-            stage1_load_en  <= 1'b0;
+            weight_reg      <= '0;
+            act_reg         <= '0;
+            sum_reg         <= '0;
+            prod_reg        <= '0;
             activations_out <= '0;
-            sums_out <= '0;
-            load_en_out <= 1'b0;
+            sums_out        <= '0;
+            load_en_out     <= 1'b0;
         end else begin
-
-            stage1_load_en <= load_en;
+            load_en_out <= load_en;
             
             if (load_en) begin
-                weight_reg  <= sums_in[DATA_WIDTH-1:0]; 
-                stage1_sum  <= sums_in;                 
-                stage1_act  <= '0;                      
-                stage1_prod <= '0;
-            end else begin
-                stage1_act  <= activations_in;
-                stage1_sum  <= sums_in;                 
-                stage1_prod <= gated_act * gated_wt;
-            end
-
-            load_en_out <= stage1_load_en;
-            
-            if (stage1_load_en) begin
-                sums_out <= stage1_sum;
+                weight_reg      <= sums_in[DATA_WIDTH-1:0]; 
+                sum_reg         <= sums_in;                 
+                act_reg         <= '0;                      
+                prod_reg        <= '0;
+                
+                sums_out        <= sums_in; 
                 activations_out <= '0;
             end else begin
-                sums_out <= stage1_prod + stage1_sum;
-                activations_out <= stage1_act;
+                act_reg         <= activations_in;
+                sum_reg         <= sums_in;                 
+                prod_reg        <= gated_act * gated_wt; 
+                
+                sums_out        <= prod_reg + sum_reg;
+                activations_out <= act_reg;
             end
         end
     end
