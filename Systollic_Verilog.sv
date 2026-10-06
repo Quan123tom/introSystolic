@@ -13,47 +13,43 @@ module PE #(
     output logic signed [DATA_WIDTH-1:0] activations_out,
     output logic signed [ACC_WIDTH-1:0]  sums_out
 );
-
+    assign load_en_out = load_en;
     logic signed [DATA_WIDTH-1:0] weight_reg;
     logic signed [DATA_WIDTH-1:0] act_reg;
     logic signed [ACC_WIDTH-1:0]  sum_reg;
     logic signed [ACC_WIDTH-1:0]  prod_reg;
 
-    logic act_valid;
+    logic [DATA_WIDTH-1:0] iso_mask;
+    assign iso_mask = (activations_in != '0) ? '1 : '0;
+    
     logic signed [DATA_WIDTH-1:0] gated_act;
     logic signed [DATA_WIDTH-1:0] gated_wt;
-    
-    assign act_valid = (activations_in != '0);
-
-    assign gated_act = activations_in & {DATA_WIDTH{act_valid}};
-    assign gated_wt  = weight_reg     & {DATA_WIDTH{act_valid}};
+    assign gated_act = activations_in & iso_mask;
+    assign gated_wt  = weight_reg     & iso_mask;
 
     always_ff @(posedge clk or negedge rst_ni) begin
         if (!rst_ni) begin
-            weight_reg      <= '0;
-            act_reg         <= '0;
-            sum_reg         <= '0;
-            prod_reg        <= '0;
+            weight_reg <= '0;
+            act_reg <= '0;
+            sum_reg <= '0;
+            prod_reg <= '0;
             activations_out <= '0;
-            sums_out        <= '0;
-            load_en_out     <= 1'b0;
+            sums_out <= '0;
         end else begin
-            load_en_out <= load_en;
-            
             if (load_en) begin
-                weight_reg      <= sums_in[DATA_WIDTH-1:0]; 
-                sum_reg         <= sums_in;                 
-                act_reg         <= '0;                      
-                prod_reg        <= '0;
+                weight_reg <= sums_in[DATA_WIDTH-1:0]; 
+                sum_reg <= sums_in;                 
+                act_reg <= '0;                      
+                prod_reg <= '0;
                 
-                sums_out        <= sums_in; 
+                sums_out <= sums_in; // 1-cycle delay so that i can shift data down
                 activations_out <= '0;
             end else begin
-                act_reg         <= activations_in;
-                sum_reg         <= sums_in;                 
-                prod_reg        <= gated_act * gated_wt; 
+                act_reg <= activations_in;
+                sum_reg <= sums_in;                 
+                prod_reg <= gated_act * gated_wt; 
                 
-                sums_out        <= prod_reg + sum_reg;
+                sums_out <= prod_reg + sum_reg;
                 activations_out <= act_reg;
             end
         end
