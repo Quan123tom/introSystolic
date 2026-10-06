@@ -37,21 +37,20 @@ module tpu_wrapper #(
     logic signed [ACC_WIDTH-1:0]  grid_out_bottom [0:GRID_SIZE-1];
     logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] deskew_in;
     logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] deskew_out;
-
-    // Output valid generation
     logic valid_out; 
+
     sync_sram #(.DATA_WIDTH(GRID_SIZE*DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_a_weights (
-        .clk(clk), .en(fsm_en_weight_agu), .we(1'b0), // Read-only for TPU
+        .clk(clk), .en(fsm_en_weight_agu), .we(1'b0),
         .addr(bank_a_addr), .wdata('0), .rdata(bank_a_rdata)
     );
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_b_acts (
-        .clk(clk), .en(fsm_en_act_agu), .we(1'b0), // Read-only for TPU
+        .clk(clk), .en(fsm_en_act_agu), .we(1'b0),
         .addr(bank_b_addr), .wdata('0), .rdata(bank_b_rdata)
     );
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*ACC_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_c_outs (
-        .clk(clk), .en(valid_out), .we(valid_out), // Driven by valid pipeline!
+        .clk(clk), .en(valid_out), .we(valid_out), 
         .addr(bank_c_addr), .wdata(bank_c_wdata), .rdata() 
     );
 
@@ -76,18 +75,15 @@ module tpu_wrapper #(
     genvar i;
     generate
         for (i = 0; i < GRID_SIZE; i++) begin : gen_routing
-            // sram read data to arrays
             assign skew_in[i] = bank_b_rdata[i*DATA_WIDTH +: DATA_WIDTH];
             assign grid_in_left[i] = skew_out[i];
             
-            // MUX the top input: Feed weights during load, feed Zeros during compute
             assign grid_in_top[i] = fsm_loading_weights ? 
                                     {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : 
                                     '0;
             
             assign grid_load_en[i] = load_en_aligned;
             
-            // Output routing
             assign deskew_in[i] = grid_out_bottom[i];
             assign bank_c_wdata[i*ACC_WIDTH +: ACC_WIDTH] = deskew_out[i];
         end
@@ -106,7 +102,8 @@ module tpu_wrapper #(
         .clk(clk), .rst_n(rst_ni), .in_data(deskew_in), .out_data(deskew_out)
     );
 
-    localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2) + ((GRID_SIZE-1)*2);
+    // Exact cycle latency calculation fixed
+    localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2);
     
     logic [PIPELINE_DEPTH-1:0] valid_shift_reg;
     always_ff @(posedge clk or negedge rst_ni) begin
@@ -114,7 +111,8 @@ module tpu_wrapper #(
         else valid_shift_reg <= {valid_shift_reg[PIPELINE_DEPTH-2:0], fsm_pushing_acts};
     end    
     assign valid_out = valid_shift_reg[PIPELINE_DEPTH-1];
-    tpu_fsm u_fsm (
+
+    tpu_fsm #(.GRID_SIZE(GRID_SIZE)) u_fsm (
         .clk(clk), .rst_ni(rst_ni), .start(start), .act_rows(csr_act_rows),
         .valid_pipe_empty(valid_shift_reg == '0),
         .fsm_load_agus(fsm_load_agus), .fsm_loading_weights(fsm_loading_weights),
