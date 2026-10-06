@@ -7,7 +7,6 @@ module tpu_wrapper #(
     input  logic clk,
     input  logic rst_ni,
     
-    // CSR Interfaces (from RISC-V AXI)
     input  logic start,
     input  logic [ADDR_WIDTH-1:0] csr_weight_base,
     input  logic [ADDR_WIDTH-1:0] csr_act_base,
@@ -40,21 +39,21 @@ module tpu_wrapper #(
     logic valid_out; 
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_a_weights (
-        .clk(clk), .en(fsm_en_weight_agu), .we(1'b0),
+        .clk(clk), .en(fsm_en_weight_agu), .we(1'b0), // Read-only for TPU
         .addr(bank_a_addr), .wdata('0), .rdata(bank_a_rdata)
     );
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_b_acts (
-        .clk(clk), .en(fsm_en_act_agu), .we(1'b0),
+        .clk(clk), .en(fsm_en_act_agu), .we(1'b0), // Read-only for TPU
         .addr(bank_b_addr), .wdata('0), .rdata(bank_b_rdata)
     );
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*ACC_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_c_outs (
-        .clk(clk), .en(valid_out), .we(valid_out), 
+        .clk(clk), .en(valid_out), .we(valid_out), // Driven by valid pipeline
         .addr(bank_c_addr), .wdata(bank_c_wdata), .rdata() 
     );
 
-    agu #(.ADDR_WIDTH(ADDR_WIDTH)) agu_weights (
+    agu #(.ADDR_WIDTH(ADDR_WIDTH), .COUNT_DOWN(1), .MAX_CNT(GRID_SIZE-1)) agu_weights (
         .clk(clk), .rst_ni(rst_ni), .load_base(fsm_load_agus),
         .en(fsm_en_weight_agu), .base_addr(csr_weight_base), .current_addr(bank_a_addr)
     );
@@ -77,13 +76,14 @@ module tpu_wrapper #(
         for (i = 0; i < GRID_SIZE; i++) begin : gen_routing
             assign skew_in[i] = bank_b_rdata[i*DATA_WIDTH +: DATA_WIDTH];
             assign grid_in_left[i] = skew_out[i];
-            
-            assign grid_in_top[i] = fsm_loading_weights ? 
+
+            assign grid_in_top[i] = load_en_aligned ? 
                                     {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : 
                                     '0;
             
             assign grid_load_en[i] = load_en_aligned;
             
+            // Output routing
             assign deskew_in[i] = grid_out_bottom[i];
             assign bank_c_wdata[i*ACC_WIDTH +: ACC_WIDTH] = deskew_out[i];
         end
@@ -102,7 +102,7 @@ module tpu_wrapper #(
         .clk(clk), .rst_n(rst_ni), .in_data(deskew_in), .out_data(deskew_out)
     );
 
-    // Exact cycle latency calculation fixed
+    // Exact cycle latency: 1 (SRAM read) + Max Skew Delay + Grid Traversal
     localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2);
     
     logic [PIPELINE_DEPTH-1:0] valid_shift_reg;
