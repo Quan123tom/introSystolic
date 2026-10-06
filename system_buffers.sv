@@ -9,6 +9,6 @@ module buffers #(
     input  logic [DATA_WIDTH-1:0] write_data,
     
 
-);
+)
     
 endmodule
