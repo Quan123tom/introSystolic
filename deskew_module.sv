@@ -1,7 +1,7 @@
 module deskew_unit #(
      parameter ACC_WIDTH = 19,
      parameter GRID_SIZE = 8,
-    parameter DELAY_PER_STEP = 2 
+    parameter DELAY_PER_STEP = 2
 )(
     input logic clk,
     input logic rst_n,
@@ -21,10 +21,10 @@ module deskew_unit #(
                  else begin
                     pipe[0] <= in_data[col];
                      for (int k = 1; k < DELAY; k++) pipe[k] <= pipe[k-1];
-                    end
-                end
-                assign out_data[col] = pipe[DELAY-1];
-            end
-        end
-    endgenerate
+                     end
+                end
+                assign out_data[col] = pipe[DELAY-1];
+             end
+         end
+     endgenerate
 endmodule
