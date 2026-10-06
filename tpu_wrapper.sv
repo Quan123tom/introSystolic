@@ -39,17 +39,17 @@ module tpu_wrapper #(
     logic valid_out; 
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_a_weights (
-        .clk(clk), .en(fsm_en_weight_agu), .we(1'b0), // Read-only for TPU
+        .clk(clk), .en(fsm_en_weight_agu), .we(1'b0), // for the tpu, this is read only
         .addr(bank_a_addr), .wdata('0), .rdata(bank_a_rdata)
     );
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_b_acts (
-        .clk(clk), .en(fsm_en_act_agu), .we(1'b0), // Read-only for TPU
+        .clk(clk), .en(fsm_en_act_agu), .we(1'b0), // same as above
         .addr(bank_b_addr), .wdata('0), .rdata(bank_b_rdata)
     );
 
     sync_sram #(.DATA_WIDTH(GRID_SIZE*ACC_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) bank_c_outs (
-        .clk(clk), .en(valid_out), .we(valid_out), // Driven by valid pipeline
+        .clk(clk), .en(valid_out), .we(valid_out),  // driven 
         .addr(bank_c_addr), .wdata(bank_c_wdata), .rdata() 
     );
 
@@ -76,13 +76,10 @@ module tpu_wrapper #(
         for (i = 0; i < GRID_SIZE; i++) begin : gen_routing
             assign skew_in[i] = bank_b_rdata[i*DATA_WIDTH +: DATA_WIDTH];
             assign grid_in_left[i] = skew_out[i];
-
             assign grid_in_top[i] = load_en_aligned ? 
                                     {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : 
                                     '0;
-            
             assign grid_load_en[i] = load_en_aligned;
-            
             // Output routing
             assign deskew_in[i] = grid_out_bottom[i];
             assign bank_c_wdata[i*ACC_WIDTH +: ACC_WIDTH] = deskew_out[i];
@@ -92,18 +89,14 @@ module tpu_wrapper #(
     skew_unit #(.DATA_WIDTH(DATA_WIDTH), .GRID_SIZE(GRID_SIZE), .DELAY_PER_STEP(2)) u_skew (
         .clk(clk), .rst_n(rst_ni), .in_data(skew_in), .out_data(skew_out)
     );
-
     systolic_grid #(.DATA_WIDTH(DATA_WIDTH), .ACC_WIDTH(ACC_WIDTH), .GRID_SIZE(GRID_SIZE)) u_grid (
         .clk(clk), .rst_ni(rst_ni), .in_top(grid_in_top), .load_en_in(grid_load_en),
         .in_left(grid_in_left), .out_right(), .out_bottom(grid_out_bottom)
     );
-
     deskew_unit #(.ACC_WIDTH(ACC_WIDTH), .GRID_SIZE(GRID_SIZE), .DELAY_PER_STEP(2)) u_deskew (
         .clk(clk), .rst_n(rst_ni), .in_data(deskew_in), .out_data(deskew_out)
     );
-
-    // Exact cycle latency: 1 (SRAM read) + Max Skew Delay + Grid Traversal
-    localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2);
+    localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2); // calculayes the cycle latency 
     
     logic [PIPELINE_DEPTH-1:0] valid_shift_reg;
     always_ff @(posedge clk or negedge rst_ni) begin

@@ -4,7 +4,7 @@ module tpu_axi_wrapper #(
     parameter integer C_S_AXI_DATA_WIDTH = 32,
     parameter integer C_S_AXI_ADDR_WIDTH = 6, 
     
-    // TPU Parameters
+    // parameters
     parameter DATA_WIDTH = 8,
     parameter ACC_WIDTH  = 19,
     parameter GRID_SIZE  = 8,
