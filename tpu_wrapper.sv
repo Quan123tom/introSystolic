@@ -4,15 +4,14 @@ module tpu_wrapper #(
     parameter GRID_SIZE  = 8,
     parameter ADDR_WIDTH = 10 
 )(
-    input  logic clk,
-    input  logic rst_ni,
-    
+    input logic clk,
+    input logic rst_ni,
     // control and config signals
-    input  logic start,
-    input  logic [ADDR_WIDTH-1:0] csr_weight_base,
-    input  logic [ADDR_WIDTH-1:0] csr_act_base,
-    input  logic [ADDR_WIDTH-1:0] csr_out_base,
-    input  logic [15:0] csr_act_rows,
+    input logic start,
+    input logic [ADDR_WIDTH-1:0] csr_weight_base,
+    input logic [ADDR_WIDTH-1:0] csr_act_base,
+    input logic [ADDR_WIDTH-1:0] csr_out_base,
+    input logic [15:0] csr_act_rows,
     
     // 
     output logic busy,
@@ -77,7 +76,6 @@ module tpu_wrapper #(
         for (i = 0; i < GRID_SIZE; i++) begin : gen_routing
             assign skew_in[i] = bank_b_rdata[i*DATA_WIDTH +: DATA_WIDTH];
             assign grid_in_left[i] = skew_out[i];
-            
             assign grid_in_top[i] = load_en_aligned ? 
                                     {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : '0;
             assign grid_load_en[i] = load_en_aligned;

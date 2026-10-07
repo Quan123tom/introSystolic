@@ -1,12 +1,12 @@
 module deskew_unit #(
-     parameter ACC_WIDTH = 19,
-     parameter GRID_SIZE = 8,
+    parameter ACC_WIDTH = 19,
+    parameter GRID_SIZE = 8,
     parameter DELAY_PER_STEP = 2    
 )(
     input logic clk,
     input logic rst_ni,
     input logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] in_data,
-     output logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] out_data
+    output logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] out_data
 );
      genvar col;
     generate
