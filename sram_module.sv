@@ -6,8 +6,8 @@ module sync_sram #(
     input  logic en,      
     input  logic we,      
     input  logic [ADDR_WIDTH-1:0] addr,
-    input  logic signed [DATA_WIDTH-1:0] wdata,
-    output logic signed [DATA_WIDTH-1:0] rdata
+    input  logic [DATA_WIDTH-1:0] wdata,
+    output logic [DATA_WIDTH-1:0] rdata
 );
 
     localparam int DEPTH = 1 << ADDR_WIDTH;

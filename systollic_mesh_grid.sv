@@ -14,9 +14,10 @@ module systolic_grid #(
     logic signed [ACC_WIDTH-1:0] sum_bus [0:GRID_SIZE][0:GRID_SIZE-1];
     logic signed [DATA_WIDTH-1:0] act_bus [0:GRID_SIZE-1][0:GRID_SIZE];
     logic load_en_bus [0:GRID_SIZE][0:GRID_SIZE-1];
+    // map external I/O to the routing mesh boundaries
     genvar b;
     generate
-        for (b = 0; b < GRID_SIZE; b++) begin : code_for_boundaries
+        for (b = 0; b < GRID_SIZE; b++) begin : for_boundaries
             assign act_bus[b][0] = in_left[b]; 
             assign sum_bus[0][b] = in_top[b]; 
             assign load_en_bus[0][b] = load_en_in[b];
@@ -25,6 +26,7 @@ module systolic_grid #(
             assign out_right[b] = act_bus[b][GRID_SIZE]; 
         end
     endgenerate
+    // making the NxN grid of PEs
     genvar i, j;
     generate
         for (i = 0; i < GRID_SIZE; i++) begin : row_loop

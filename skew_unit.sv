@@ -5,7 +5,7 @@ module skew_unit #(
     parameter DELAY_PER_STEP = 2 
 )(
     input  logic clk,
-    input  logic rst_n,
+    input  logic rst_ni,
     input  logic [GRID_SIZE-1:0][DATA_WIDTH-1:0] in_data,
     output logic [GRID_SIZE-1:0][DATA_WIDTH-1:0] out_data
 );
@@ -13,13 +13,14 @@ module skew_unit #(
     genvar row;
     generate
         for (row = 0; row < GRID_SIZE; row++) begin : gen_skew_rows
+            // increment delay proportionally to the row index
             localparam DELAY = row * DELAY_PER_STEP;
             
             if (DELAY == 0) begin : gen_no_delay
                 assign out_data[row] = in_data[row];
             end else begin : gen_delay
                 logic [DELAY-1:0][DATA_WIDTH-1:0] pipe;
-                
+                // shift register implementation for pipeline delay
                 always_ff @(posedge clk or negedge rst_n) begin
                     if (!rst_n) begin
                         pipe <= '0;

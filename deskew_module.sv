@@ -4,7 +4,7 @@ module deskew_unit #(
     parameter DELAY_PER_STEP = 2    
 )(
     input logic clk,
-    input logic rst_n,
+    input logic rst_ni,
     input logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] in_data,
      output logic [GRID_SIZE-1:0][ACC_WIDTH-1:0] out_data
 );

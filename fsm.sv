@@ -31,15 +31,14 @@ module tpu_fsm #(
 
     always_ff @(posedge clk or negedge rst_ni) begin
         if (!rst_ni) begin
-            state      <= ST_IDLE;
+            state <= ST_IDLE;
             weight_cnt <= '0;
-            act_cnt    <= '0;
+            act_cnt <= '0;
         end else begin
             state <= next_state;
-            
             if (state == ST_IDLE) begin
                 weight_cnt <= '0;
-                act_cnt    <= '0;
+                act_cnt <= '0;
             end else if (state == ST_LOAD_WEIGHTS) begin
                 weight_cnt <= weight_cnt + 1'b1;
             end else if (state == ST_COMPUTE) begin
@@ -67,14 +66,14 @@ module tpu_fsm #(
 
             ST_LOAD_WEIGHTS: begin
                 fsm_loading_weights = 1'b1;
-                fsm_en_weight_agu   = 1'b1;
+                fsm_en_weight_agu = 1'b1;
                 if (weight_cnt == GRID_SIZE - 1) next_state = ST_COMPUTE;
             end
 
             ST_COMPUTE: begin
                 fsm_pushing_acts = 1'b1;
-                fsm_en_act_agu   = 1'b1;
-                if (act_cnt == act_rows - 1'b1) next_state = ST_DRAIN;
+                fsm_en_act_agu = 1'b1;
+                if (act_cnt == act_rows - 1) next_state = ST_DRAIN;
             end
 
             ST_DRAIN: begin

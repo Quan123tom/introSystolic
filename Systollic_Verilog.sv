@@ -19,7 +19,8 @@ module PE #(
     logic signed [DATA_WIDTH-1:0] act_reg;
     logic signed [ACC_WIDTH-1:0]  sum_reg;
     logic signed [ACC_WIDTH-1:0]  prod_reg;
-
+    // generating a boolean mask based on activation validity.
+    // forces multiplier inputs to zero statically when data is invalid,  eliminating downstream combinational toggling in the MAC logic.
     logic [DATA_WIDTH-1:0] iso_mask;
     assign iso_mask = (activations_in != '0) ? '1 : '0;
     
