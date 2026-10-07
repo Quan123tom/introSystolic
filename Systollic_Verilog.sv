@@ -13,6 +13,7 @@ module PE #(
     output logic signed [DATA_WIDTH-1:0] activations_out,
     output logic signed [ACC_WIDTH-1:0]  sums_out
 );
+    // combinational pass-through creates a synchronous column-wide load signal => allows an entire column of PEs to capture weights at the same time
     assign load_en_out = load_en;
     logic signed [DATA_WIDTH-1:0] weight_reg;
     logic signed [DATA_WIDTH-1:0] act_reg;
@@ -42,7 +43,7 @@ module PE #(
                 act_reg <= '0;                      
                 prod_reg <= '0;
                 
-                sums_out <= sums_in; // 1-cycle delay so that i can shift data down
+                sums_out <= sums_in; // pipeline reg for vertical synchronization
                 activations_out <= '0;
             end else begin
                 act_reg <= activations_in;

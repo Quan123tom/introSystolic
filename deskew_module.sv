@@ -1,7 +1,7 @@
 module deskew_unit #(
      parameter ACC_WIDTH = 19,
      parameter GRID_SIZE = 8,
-    parameter DELAY_PER_STEP = 2
+    parameter DELAY_PER_STEP = 2    
 )(
     input logic clk,
     input logic rst_n,
@@ -11,6 +11,7 @@ module deskew_unit #(
      genvar col;
     generate
      for (col = 0; col < GRID_SIZE; col++) begin : gen_deskew_cols
+        // invert the delay logic: Leftmost columns experience maximum delay,rightmost pass right away
          localparam DELAY = (GRID_SIZE - 1 - col) * DELAY_PER_STEP;
              if (DELAY == 0) begin : gen_no_delay
                  assign out_data[col] = in_data[col];

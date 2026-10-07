@@ -7,14 +7,14 @@ module tpu_wrapper #(
     input  logic clk,
     input  logic rst_ni,
     
-    // Direct Control and Configuration Signals
+    // control and config signals
     input  logic start,
     input  logic [ADDR_WIDTH-1:0] csr_weight_base,
     input  logic [ADDR_WIDTH-1:0] csr_act_base,
     input  logic [ADDR_WIDTH-1:0] csr_out_base,
     input  logic [15:0]           csr_act_rows,
     
-    // Status Outputs
+    // 
     output logic busy,
     output logic done
 );
@@ -22,13 +22,13 @@ module tpu_wrapper #(
     logic fsm_load_agus, fsm_loading_weights, fsm_pushing_acts;
     logic fsm_en_weight_agu, fsm_en_act_agu;
     
-    // SRAM Interfaces
+    // sram
     logic [ADDR_WIDTH-1:0] bank_a_addr, bank_b_addr, bank_c_addr;
     logic [(GRID_SIZE*DATA_WIDTH)-1:0] bank_a_rdata;
     logic [(GRID_SIZE*DATA_WIDTH)-1:0] bank_b_rdata;
     logic [(GRID_SIZE*ACC_WIDTH)-1:0]  bank_c_wdata;
     
-    // Datapath Interfaces
+    // datapath 
     logic [GRID_SIZE-1:0][DATA_WIDTH-1:0] skew_in;
     logic [GRID_SIZE-1:0][DATA_WIDTH-1:0] skew_out;
     logic signed [DATA_WIDTH-1:0] grid_in_left [0:GRID_SIZE-1];
@@ -79,11 +79,8 @@ module tpu_wrapper #(
             assign grid_in_left[i] = skew_out[i];
             
             assign grid_in_top[i] = load_en_aligned ? 
-                                    {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : 
-                                    '0;
-            
+                                    {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : '0;
             assign grid_load_en[i] = load_en_aligned;
-            
             assign deskew_in[i] = grid_out_bottom[i];
             assign bank_c_wdata[i*ACC_WIDTH +: ACC_WIDTH] = deskew_out[i];
         end
@@ -103,7 +100,7 @@ module tpu_wrapper #(
     );
 
     localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2);
-    
+    // exact cycle latency = 1 (SRAM Read) + Max Input Skew + Array Traversal
     logic [PIPELINE_DEPTH-1:0] valid_shift_reg;
     always_ff @(posedge clk or negedge rst_ni) begin
         if (!rst_ni) valid_shift_reg <= '0;
