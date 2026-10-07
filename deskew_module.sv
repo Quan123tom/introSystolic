@@ -17,8 +17,8 @@ module deskew_unit #(
                  assign out_data[col] = in_data[col];
         end else begin : gen_delay
                 logic [DELAY-1:0][ACC_WIDTH-1:0] pipe;
-                always_ff @(posedge clk or negedge rst_n) begin
-                 if (!rst_n) pipe <= '0;
+                always_ff @(posedge clk or negedge rst_ni) begin
+                 if (!rst_ni) pipe <= '0;
                  else begin
                     pipe[0] <= in_data[col];
                      for (int k = 1; k < DELAY; k++) pipe[k] <= pipe[k-1];

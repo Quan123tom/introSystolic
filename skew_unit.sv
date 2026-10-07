@@ -21,8 +21,8 @@ module skew_unit #(
             end else begin : gen_delay
                 logic [DELAY-1:0][DATA_WIDTH-1:0] pipe;
                 // shift register implementation for pipeline delay
-                always_ff @(posedge clk or negedge rst_n) begin
-                    if (!rst_n) begin
+                always_ff @(posedge clk or negedge rst_ni) begin
+                    if (!rst_ni) begin
                         pipe <= '0;
                     end else begin
                         pipe[0] <= in_data[row];
