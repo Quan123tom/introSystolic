@@ -12,7 +12,7 @@ module tpu_wrapper #(
     input  logic [ADDR_WIDTH-1:0] csr_weight_base,
     input  logic [ADDR_WIDTH-1:0] csr_act_base,
     input  logic [ADDR_WIDTH-1:0] csr_out_base,
-    input  logic [15:0]           csr_act_rows,
+    input  logic [15:0] csr_act_rows,
     
     // 
     output logic busy,
@@ -87,7 +87,7 @@ module tpu_wrapper #(
     endgenerate
 
     skew_unit #(.DATA_WIDTH(DATA_WIDTH), .GRID_SIZE(GRID_SIZE), .DELAY_PER_STEP(2)) u_skew (
-        .clk(clk), .rst_n(rst_ni), .in_data(skew_in), .out_data(skew_out)
+        .clk(clk), .rst_ni(rst_ni), .in_data(skew_in), .out_data(skew_out)
     );
 
     systolic_grid #(.DATA_WIDTH(DATA_WIDTH), .ACC_WIDTH(ACC_WIDTH), .GRID_SIZE(GRID_SIZE)) u_grid (
@@ -96,7 +96,7 @@ module tpu_wrapper #(
     );
 
     deskew_unit #(.ACC_WIDTH(ACC_WIDTH), .GRID_SIZE(GRID_SIZE), .DELAY_PER_STEP(2)) u_deskew (
-        .clk(clk), .rst_n(rst_ni), .in_data(deskew_in), .out_data(deskew_out)
+        .clk(clk), .rst_ni(rst_ni), .in_data(deskew_in), .out_data(deskew_out)
     );
 
     localparam PIPELINE_DEPTH = 1 + ((GRID_SIZE-1)*2) + (GRID_SIZE*2);
