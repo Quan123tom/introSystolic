@@ -14,7 +14,6 @@ module agu #(
         if (!rst_ni) begin
             current_addr <= '0;
         end else if (load_base) begin
-            // updated version here 
             current_addr <= COUNT_DOWN ? (base_addr + MAX_CNT) : base_addr;
         end else if (en) begin
             current_addr <= COUNT_DOWN ? (current_addr - 1'b1) : (current_addr + 1'b1);
