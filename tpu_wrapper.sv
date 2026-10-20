@@ -69,15 +69,20 @@ module tpu_wrapper #(
     );
 
     logic load_en_aligned;
-    always_ff @(posedge clk) load_en_aligned <= fsm_loading_weights;
+    logic act_valid_aligned; /// aaa
+    always_ff @(posedge clk or negedge rst_ni) begin
+        if (!rst_ni) act_valid_aligned <= 1'b0;
+        else act_valid_aligned <= fsm_en_act_agu;
+    end //// aaaa
+    always_ff @(posedge clk or or negedge rst_ni) load_en_aligned <= fsm_loading_weights;
 
     genvar i;
     generate
         for (i = 0; i < GRID_SIZE; i++) begin : gen_routing
-            assign skew_in[i] = bank_b_rdata[i*DATA_WIDTH +: DATA_WIDTH];
+            assign skew_in[i] = act_valid_aligned ? bank_b_rdata[i*DATA_WIDTH +: DATA_WIDTH] : '0;
             assign grid_in_left[i] = skew_out[i];
             assign grid_in_top[i] = load_en_aligned ? 
-                                    {{(ACC_WIDTH-DATA_WIDTH){1'b0}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : '0;
+                        {{(ACC_WIDTH-DATA_WIDTH){bank_a_rdata[(i+1)*DATA_WIDTH-1]}}, bank_a_rdata[i*DATA_WIDTH +: DATA_WIDTH]} : '0;
             assign grid_load_en[i] = load_en_aligned;
             assign deskew_in[i] = grid_out_bottom[i];
             assign bank_c_wdata[i*ACC_WIDTH +: ACC_WIDTH] = deskew_out[i];

@@ -19,16 +19,10 @@ module PE #(
     logic signed [DATA_WIDTH-1:0] act_reg;
     logic signed [ACC_WIDTH-1:0] sum_reg;
     logic signed [ACC_WIDTH-1:0] prod_reg;
-    // generating a boolean mask based on activation validity.
-    // forces multiplier inputs to zero statically when data is invalid,  eliminating downstream combinational toggling in the MAC logic.
-    logic [DATA_WIDTH-1:0] iso_mask;
-    assign iso_mask = (activations_in != '0) ? '1 : '0;
     
-    logic signed [DATA_WIDTH-1:0] gated_act;
+    // Gate weight input when activation is zero to save multiplier switching power
     logic signed [DATA_WIDTH-1:0] gated_wt;
-    assign gated_act = activations_in & iso_mask;
-    assign gated_wt  = weight_reg & iso_mask;
-
+    assign gated_wt = (activations_in != '0) ? weight_reg : '0;
     always_ff @(posedge clk or negedge rst_ni) begin
         if (!rst_ni) begin
             weight_reg <= '0;
@@ -40,7 +34,7 @@ module PE #(
         end else begin
             if (load_en) begin
                 weight_reg <= sums_in[DATA_WIDTH-1:0]; 
-                sum_reg <= sums_in;                 
+                sum_reg <= '0;                 
                 act_reg <= '0;                      
                 prod_reg <= '0;
                 sums_out <= sums_in; // pipeline reg for vertical synchronization
@@ -48,8 +42,7 @@ module PE #(
             end else begin
                 act_reg <= activations_in;
                 sum_reg <= sums_in;                 
-                prod_reg <= gated_act * gated_wt; 
-                
+                prod_reg  <= activations_in * gated_wt; 
                 sums_out <= prod_reg + sum_reg;
                 activations_out <= act_reg;
             end

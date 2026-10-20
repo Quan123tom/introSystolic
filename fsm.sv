@@ -25,8 +25,7 @@ module tpu_fsm #(
     } state_t;
     
     state_t state, next_state;
-
-    logic [3:0]  weight_cnt;
+    logic [$clog2(GRID_SIZE)-1:0] weight_cnt;
     logic [15:0] act_cnt;
 
     always_ff @(posedge clk or negedge rst_ni) begin
